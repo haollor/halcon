@@ -1,0 +1,12 @@
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\bin\x64\Debug\Multiobject_Sorting.exe.config
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\bin\x64\Debug\Multiobject_Sorting.exe
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\bin\x64\Debug\Multiobject_Sorting.pdb
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\bin\x64\Debug\halcondotnet.dll
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\bin\x64\Debug\halcondotnet.xml
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\obj\x64\Debug\Multiobject_Sorting.Form1.resources
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\obj\x64\Debug\Multiobject_Sorting.Properties.Resources.resources
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\obj\x64\Debug\Multiobject_Sorting.csproj.GenerateResource.cache
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\obj\x64\Debug\Multiobject_Sorting.csproj.CoreCompileInputs.cache
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\obj\x64\Debug\Multiobject_Sorting.csproj.CopyComplete
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\obj\x64\Debug\Multiobject_Sorting.exe
+C:\Users\luhao\source\repos\Multiobject_Sorting\Multiobject_Sorting\obj\x64\Debug\Multiobject_Sorting.pdb
