@@ -732,6 +732,7 @@ namespace Multiobject_Sorting
         private Label lblHueMin, lblHueMax, lblSatMin, lblSatMax, lblValMin, lblValMax;
         private Button btnOK, btnCancel, btnPreview, btnReset;
         private HalconWrapper parentHalconWrapper;  // 引用父窗口的HalconWrapper
+        private ToolTip toolTip;
 
         public HSVParameterForm(HalconWrapper.HSVParameters currentParams, HalconWrapper halconWrapper = null)
         {
@@ -758,7 +759,7 @@ namespace Multiobject_Sorting
             // 设置窗体属性
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(520, 400);
+            this.ClientSize = new System.Drawing.Size(580, 480);
             this.Name = "HSVParameterForm";
             this.Text = "HSV参数设置";
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -766,73 +767,140 @@ namespace Multiobject_Sorting
             this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterParent;
 
-            int yPos = 20;
-            int labelWidth = 80;
-            int trackBarWidth = 200;
-            int valueWidth = 60;
+            int yPos = 25;
+            int leftMargin = 30;
+            int labelWidth = 90;
+            int trackBarWidth = 180;
+            int valueWidth = 50;
+            int spacing = 10;
 
-            // Hue参数
-            var lblHue = new Label { Text = "色调(H):", Location = new Point(20, yPos), Size = new Size(labelWidth, 20) };
-            this.Controls.Add(lblHue);
-
-            lblHueMin = new Label { Text = "0", Location = new Point(20 + labelWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
-            trackBarHueMin = new TrackBar { Location = new Point(20 + labelWidth + 10 + valueWidth, yPos + 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 180, TickFrequency = 20 };
-            lblHueMax = new Label { Text = "180", Location = new Point(20 + labelWidth + 10 + valueWidth + trackBarWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
-            trackBarHueMax = new TrackBar { Location = new Point(20 + labelWidth + 10, yPos + 50), Size = new Size(trackBarWidth + valueWidth, 30), Minimum = 0, Maximum = 180, TickFrequency = 20 };
-
-            trackBarHueMin.ValueChanged += (s, e) => { lblHueMin.Text = trackBarHueMin.Value.ToString(); HSVParameters.HueMin = trackBarHueMin.Value; };
-            trackBarHueMax.ValueChanged += (s, e) => { lblHueMax.Text = trackBarHueMax.Value.ToString(); HSVParameters.HueMax = trackBarHueMax.Value; };
-
-            this.Controls.AddRange(new Control[] { lblHueMin, trackBarHueMin, lblHueMax, trackBarHueMax });
-            yPos += 90;
-
-            // Saturation参数
-            var lblSat = new Label { Text = "饱和度(S):", Location = new Point(20, yPos), Size = new Size(labelWidth, 20) };
-            this.Controls.Add(lblSat);
-
-            lblSatMin = new Label { Text = "0", Location = new Point(20 + labelWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
-            trackBarSatMin = new TrackBar { Location = new Point(20 + labelWidth + 10 + valueWidth, yPos + 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
-            lblSatMax = new Label { Text = "255", Location = new Point(20 + labelWidth + 10 + valueWidth + trackBarWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
-            trackBarSatMax = new TrackBar { Location = new Point(20 + labelWidth + 10, yPos + 50), Size = new Size(trackBarWidth + valueWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
-
-            trackBarSatMin.ValueChanged += (s, e) => { lblSatMin.Text = trackBarSatMin.Value.ToString(); HSVParameters.SaturationMin = trackBarSatMin.Value; };
-            trackBarSatMax.ValueChanged += (s, e) => { lblSatMax.Text = trackBarSatMax.Value.ToString(); HSVParameters.SaturationMax = trackBarSatMax.Value; };
-
-            this.Controls.AddRange(new Control[] { lblSatMin, trackBarSatMin, lblSatMax, trackBarSatMax });
-            yPos += 90;
-
-            // Value参数
-            var lblVal = new Label { Text = "亮度(V):", Location = new Point(20, yPos), Size = new Size(labelWidth, 20) };
-            this.Controls.Add(lblVal);
-
-            lblValMin = new Label { Text = "0", Location = new Point(20 + labelWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
-            trackBarValMin = new TrackBar { Location = new Point(20 + labelWidth + 10 + valueWidth, yPos + 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
-            lblValMax = new Label { Text = "255", Location = new Point(20 + labelWidth + 10 + valueWidth + trackBarWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
-            trackBarValMax = new TrackBar { Location = new Point(20 + labelWidth + 10, yPos + 50), Size = new Size(trackBarWidth + valueWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
-
-            trackBarValMin.ValueChanged += (s, e) => { lblValMin.Text = trackBarValMin.Value.ToString(); HSVParameters.ValueMin = trackBarValMin.Value; };
-            trackBarValMax.ValueChanged += (s, e) => { lblValMax.Text = trackBarValMax.Value.ToString(); HSVParameters.ValueMax = trackBarValMax.Value; };
-
-            this.Controls.AddRange(new Control[] { lblValMin, trackBarValMin, lblValMax, trackBarValMax });
-            yPos += 90;
-
-            // 面积参数
-            var lblMinArea = new Label { Text = "最小面积:", Location = new Point(20, yPos), Size = new Size(labelWidth, 20) };
-            textBoxMinArea = new TextBox { Location = new Point(20 + labelWidth + 10, yPos), Size = new Size(100, 20) };
-            textBoxMinArea.TextChanged += (s, e) => { if (double.TryParse(textBoxMinArea.Text, out double val)) HSVParameters.MinArea = val; };
-
-            var lblMaxArea = new Label { Text = "最大面积:", Location = new Point(250, yPos), Size = new Size(labelWidth, 20) };
-            textBoxMaxArea = new TextBox { Location = new Point(250 + labelWidth + 10, yPos), Size = new Size(100, 20) };
-            textBoxMaxArea.TextChanged += (s, e) => { if (double.TryParse(textBoxMaxArea.Text, out double val)) HSVParameters.MaxArea = val; };
-
-            this.Controls.AddRange(new Control[] { lblMinArea, textBoxMinArea, lblMaxArea, textBoxMaxArea });
+            // 标题标签
+            var titleLabel = new Label 
+            { 
+                Text = "HSV颜色分割参数设置", 
+                Location = new Point(leftMargin, yPos), 
+                Size = new Size(200, 25),
+                Font = new Font("Microsoft YaHei", 10, FontStyle.Bold)
+            };
+            this.Controls.Add(titleLabel);
             yPos += 40;
 
-            // 按钮
-            btnPreview = new Button { Text = "预览", Location = new Point(80, yPos), Size = new Size(75, 30) };
-            btnReset = new Button { Text = "重置显示", Location = new Point(165, yPos), Size = new Size(75, 30) };
-            btnOK = new Button { Text = "确定", Location = new Point(250, yPos), Size = new Size(75, 30), DialogResult = DialogResult.OK };
-            btnCancel = new Button { Text = "取消", Location = new Point(335, yPos), Size = new Size(75, 30), DialogResult = DialogResult.Cancel };
+            // Hue参数组
+            var grpHue = new GroupBox
+            {
+                Text = "色调 (Hue)",
+                Location = new Point(leftMargin, yPos),
+                Size = new Size(520, 85)
+            };
+
+            var lblHueMin = new Label { Text = "最小值:", Location = new Point(15, 25), Size = new Size(50, 20) };
+            this.lblHueMin = new Label { Text = "0", Location = new Point(70, 25), Size = new Size(40, 20), TextAlign = ContentAlignment.MiddleRight };
+            trackBarHueMin = new TrackBar { Location = new Point(120, 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 180, TickFrequency = 30 };
+
+            var lblHueMax = new Label { Text = "最大值:", Location = new Point(320, 25), Size = new Size(50, 20) };
+            this.lblHueMax = new Label { Text = "180", Location = new Point(375, 25), Size = new Size(40, 20), TextAlign = ContentAlignment.MiddleRight };
+            trackBarHueMax = new TrackBar { Location = new Point(120, 50), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 180, TickFrequency = 30 };
+
+            trackBarHueMin.ValueChanged += (s, e) => { this.lblHueMin.Text = trackBarHueMin.Value.ToString(); HSVParameters.HueMin = trackBarHueMin.Value; };
+            trackBarHueMax.ValueChanged += (s, e) => { this.lblHueMax.Text = trackBarHueMax.Value.ToString(); HSVParameters.HueMax = trackBarHueMax.Value; };
+
+            grpHue.Controls.AddRange(new Control[] { lblHueMin, this.lblHueMin, trackBarHueMin, lblHueMax, this.lblHueMax, trackBarHueMax });
+            this.Controls.Add(grpHue);
+            yPos += 100;
+
+            // Saturation参数组
+            var grpSat = new GroupBox
+            {
+                Text = "饱和度 (Saturation)",
+                Location = new Point(leftMargin, yPos),
+                Size = new Size(520, 85)
+            };
+
+            var lblSatMinLbl = new Label { Text = "最小值:", Location = new Point(15, 25), Size = new Size(50, 20) };
+            this.lblSatMin = new Label { Text = "0", Location = new Point(70, 25), Size = new Size(40, 20), TextAlign = ContentAlignment.MiddleRight };
+            trackBarSatMin = new TrackBar { Location = new Point(120, 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
+
+            var lblSatMaxLbl = new Label { Text = "最大值:", Location = new Point(320, 25), Size = new Size(50, 20) };
+            this.lblSatMax = new Label { Text = "255", Location = new Point(375, 25), Size = new Size(40, 20), TextAlign = ContentAlignment.MiddleRight };
+            trackBarSatMax = new TrackBar { Location = new Point(120, 50), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
+
+            trackBarSatMin.ValueChanged += (s, e) => { this.lblSatMin.Text = trackBarSatMin.Value.ToString(); HSVParameters.SaturationMin = trackBarSatMin.Value; };
+            trackBarSatMax.ValueChanged += (s, e) => { this.lblSatMax.Text = trackBarSatMax.Value.ToString(); HSVParameters.SaturationMax = trackBarSatMax.Value; };
+
+            grpSat.Controls.AddRange(new Control[] { lblSatMinLbl, this.lblSatMin, trackBarSatMin, lblSatMaxLbl, this.lblSatMax, trackBarSatMax });
+            this.Controls.Add(grpSat);
+            yPos += 100;
+
+            // Value参数组
+            var grpVal = new GroupBox
+            {
+                Text = "亮度 (Value)",
+                Location = new Point(leftMargin, yPos),
+                Size = new Size(520, 85)
+            };
+
+            var lblValMinLbl = new Label { Text = "最小值:", Location = new Point(15, 25), Size = new Size(50, 20) };
+            this.lblValMin = new Label { Text = "0", Location = new Point(70, 25), Size = new Size(40, 20), TextAlign = ContentAlignment.MiddleRight };
+            trackBarValMin = new TrackBar { Location = new Point(120, 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
+
+            var lblValMaxLbl = new Label { Text = "最大值:", Location = new Point(320, 25), Size = new Size(50, 20) };
+            this.lblValMax = new Label { Text = "255", Location = new Point(375, 25), Size = new Size(40, 20), TextAlign = ContentAlignment.MiddleRight };
+            trackBarValMax = new TrackBar { Location = new Point(120, 50), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
+
+            trackBarValMin.ValueChanged += (s, e) => { this.lblValMin.Text = trackBarValMin.Value.ToString(); HSVParameters.ValueMin = trackBarValMin.Value; };
+            trackBarValMax.ValueChanged += (s, e) => { this.lblValMax.Text = trackBarValMax.Value.ToString(); HSVParameters.ValueMax = trackBarValMax.Value; };
+
+            grpVal.Controls.AddRange(new Control[] { lblValMinLbl, this.lblValMin, trackBarValMin, lblValMaxLbl, this.lblValMax, trackBarValMax });
+            this.Controls.Add(grpVal);
+            yPos += 100;
+
+            // 面积参数组
+            var grpArea = new GroupBox
+            {
+                Text = "面积过滤",
+                Location = new Point(leftMargin, yPos),
+                Size = new Size(520, 60)
+            };
+
+            var lblMinArea = new Label { Text = "最小面积:", Location = new Point(30, 25), Size = new Size(70, 20) };
+            textBoxMinArea = new TextBox { Location = new Point(110, 22), Size = new Size(120, 23) };
+            textBoxMinArea.TextChanged += (s, e) => { if (double.TryParse(textBoxMinArea.Text, out double val)) HSVParameters.MinArea = val; };
+
+            var lblMaxArea = new Label { Text = "最大面积:", Location = new Point(270, 25), Size = new Size(70, 20) };
+            textBoxMaxArea = new TextBox { Location = new Point(350, 22), Size = new Size(120, 23) };
+            textBoxMaxArea.TextChanged += (s, e) => { if (double.TryParse(textBoxMaxArea.Text, out double val)) HSVParameters.MaxArea = val; };
+
+            grpArea.Controls.AddRange(new Control[] { lblMinArea, textBoxMinArea, lblMaxArea, textBoxMaxArea });
+            this.Controls.Add(grpArea);
+            yPos += 80;
+
+            // 按钮组
+            btnPreview = new Button { 
+                Text = "预览", 
+                Location = new Point(120, yPos), 
+                Size = new Size(80, 35),
+                UseVisualStyleBackColor = true
+            };
+            btnReset = new Button { 
+                Text = "重置显示", 
+                Location = new Point(210, yPos), 
+                Size = new Size(80, 35),
+                UseVisualStyleBackColor = true
+            };
+            btnOK = new Button { 
+                Text = "确定", 
+                Location = new Point(300, yPos), 
+                Size = new Size(80, 35), 
+                DialogResult = DialogResult.OK,
+                UseVisualStyleBackColor = true
+            };
+            btnCancel = new Button { 
+                Text = "取消", 
+                Location = new Point(390, yPos), 
+                Size = new Size(80, 35), 
+                DialogResult = DialogResult.Cancel,
+                UseVisualStyleBackColor = true
+            };
 
             btnOK.Click += BtnOK_Click;
             btnCancel.Click += BtnCancel_Click;
@@ -841,27 +909,54 @@ namespace Multiobject_Sorting
 
             this.Controls.AddRange(new Control[] { btnPreview, btnReset, btnOK, btnCancel });
 
+            // 设置默认按钮和取消按钮
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
+
+            // 添加工具提示
+            toolTip = new ToolTip();
+            toolTip.SetToolTip(textBoxMinArea, "输入最小面积阈值，小于此值的区域将被过滤");
+            toolTip.SetToolTip(textBoxMaxArea, "输入最大面积阈值，大于此值的区域将被过滤");
+            toolTip.SetToolTip(btnPreview, "预览当前HSV参数的分割效果");
+            toolTip.SetToolTip(btnReset, "重置图像显示，清除预览效果");
+            toolTip.SetToolTip(trackBarHueMin, "色调最小值 (0-180)");
+            toolTip.SetToolTip(trackBarHueMax, "色调最大值 (0-180)");
+            toolTip.SetToolTip(trackBarSatMin, "饱和度最小值 (0-255)");
+            toolTip.SetToolTip(trackBarSatMax, "饱和度最大值 (0-255)");
+            toolTip.SetToolTip(trackBarValMin, "亮度最小值 (0-255)");
+            toolTip.SetToolTip(trackBarValMax, "亮度最大值 (0-255)");
+
             this.ResumeLayout(false);
         }
 
         private void LoadParameters()
         {
-            trackBarHueMin.Value = HSVParameters.HueMin;
-            trackBarHueMax.Value = HSVParameters.HueMax;
-            trackBarSatMin.Value = HSVParameters.SaturationMin;
-            trackBarSatMax.Value = HSVParameters.SaturationMax;
-            trackBarValMin.Value = HSVParameters.ValueMin;
-            trackBarValMax.Value = HSVParameters.ValueMax;
-            textBoxMinArea.Text = HSVParameters.MinArea.ToString();
-            textBoxMaxArea.Text = HSVParameters.MaxArea.ToString();
+            try
+            {
+                // 加载HSV滑块值
+                trackBarHueMin.Value = Math.Max(0, Math.Min(180, HSVParameters.HueMin));
+                trackBarHueMax.Value = Math.Max(0, Math.Min(180, HSVParameters.HueMax));
+                trackBarSatMin.Value = Math.Max(0, Math.Min(255, HSVParameters.SaturationMin));
+                trackBarSatMax.Value = Math.Max(0, Math.Min(255, HSVParameters.SaturationMax));
+                trackBarValMin.Value = Math.Max(0, Math.Min(255, HSVParameters.ValueMin));
+                trackBarValMax.Value = Math.Max(0, Math.Min(255, HSVParameters.ValueMax));
 
-            // 更新标签显示
-            lblHueMin.Text = HSVParameters.HueMin.ToString();
-            lblHueMax.Text = HSVParameters.HueMax.ToString();
-            lblSatMin.Text = HSVParameters.SaturationMin.ToString();
-            lblSatMax.Text = HSVParameters.SaturationMax.ToString();
-            lblValMin.Text = HSVParameters.ValueMin.ToString();
-            lblValMax.Text = HSVParameters.ValueMax.ToString();
+                // 加载面积参数
+                textBoxMinArea.Text = HSVParameters.MinArea.ToString("F0");
+                textBoxMaxArea.Text = HSVParameters.MaxArea.ToString("F0");
+
+                // 更新标签显示
+                lblHueMin.Text = HSVParameters.HueMin.ToString();
+                lblHueMax.Text = HSVParameters.HueMax.ToString();
+                lblSatMin.Text = HSVParameters.SaturationMin.ToString();
+                lblSatMax.Text = HSVParameters.SaturationMax.ToString();
+                lblValMin.Text = HSVParameters.ValueMin.ToString();
+                lblValMax.Text = HSVParameters.ValueMax.ToString();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"加载HSV参数失败: {ex.Message}");
+            }
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
@@ -989,6 +1084,15 @@ namespace Multiobject_Sorting
                 HSVParameters.MinArea = HSVParameters.MaxArea;
                 HSVParameters.MaxArea = temp;
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                toolTip?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 
