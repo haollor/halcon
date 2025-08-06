@@ -486,18 +486,135 @@ namespace Multiobject_Sorting
         public HSVParameterForm(HalconWrapper.HSVParameters currentParams)
         {
             InitializeComponent();
-            HSVParameters = currentParams;
+            HSVParameters = new HalconWrapper.HSVParameters
+            {
+                HueMin = currentParams.HueMin,
+                HueMax = currentParams.HueMax,
+                SaturationMin = currentParams.SaturationMin,
+                SaturationMax = currentParams.SaturationMax,
+                ValueMin = currentParams.ValueMin,
+                ValueMax = currentParams.ValueMax,
+                MinArea = currentParams.MinArea,
+                MaxArea = currentParams.MaxArea
+            };
             LoadParameters();
         }
 
         private void LoadParameters()
         {
-            // 这里应该加载参数到界面控件
+            // 加载HSV参数到界面控件
+            numericUpDownHueMin.Value = HSVParameters.HueMin;
+            numericUpDownHueMax.Value = HSVParameters.HueMax;
+            trackBarHueMin.Value = HSVParameters.HueMin;
+            trackBarHueMax.Value = HSVParameters.HueMax;
+
+            numericUpDownSatMin.Value = HSVParameters.SaturationMin;
+            numericUpDownSatMax.Value = HSVParameters.SaturationMax;
+            trackBarSatMin.Value = HSVParameters.SaturationMin;
+            trackBarSatMax.Value = HSVParameters.SaturationMax;
+
+            numericUpDownValueMin.Value = HSVParameters.ValueMin;
+            numericUpDownValueMax.Value = HSVParameters.ValueMax;
+            trackBarValueMin.Value = HSVParameters.ValueMin;
+            trackBarValueMax.Value = HSVParameters.ValueMax;
+
+            numericUpDownMinArea.Value = (decimal)HSVParameters.MinArea;
+            numericUpDownMaxArea.Value = (decimal)HSVParameters.MaxArea;
         }
 
         private void SaveParameters()
         {
-            // 这里应该从界面控件保存参数
+            // 从界面控件保存参数
+            HSVParameters.HueMin = (int)numericUpDownHueMin.Value;
+            HSVParameters.HueMax = (int)numericUpDownHueMax.Value;
+            HSVParameters.SaturationMin = (int)numericUpDownSatMin.Value;
+            HSVParameters.SaturationMax = (int)numericUpDownSatMax.Value;
+            HSVParameters.ValueMin = (int)numericUpDownValueMin.Value;
+            HSVParameters.ValueMax = (int)numericUpDownValueMax.Value;
+            HSVParameters.MinArea = (double)numericUpDownMinArea.Value;
+            HSVParameters.MaxArea = (double)numericUpDownMaxArea.Value;
+        }
+
+        // 事件处理器
+        private void trackBarHueMin_Scroll(object sender, EventArgs e)
+        {
+            numericUpDownHueMin.Value = trackBarHueMin.Value;
+        }
+
+        private void trackBarHueMax_Scroll(object sender, EventArgs e)
+        {
+            numericUpDownHueMax.Value = trackBarHueMax.Value;
+        }
+
+        private void numericUpDownHueMin_ValueChanged(object sender, EventArgs e)
+        {
+            trackBarHueMin.Value = (int)numericUpDownHueMin.Value;
+        }
+
+        private void numericUpDownHueMax_ValueChanged(object sender, EventArgs e)
+        {
+            trackBarHueMax.Value = (int)numericUpDownHueMax.Value;
+        }
+
+        private void trackBarSatMin_Scroll(object sender, EventArgs e)
+        {
+            numericUpDownSatMin.Value = trackBarSatMin.Value;
+        }
+
+        private void trackBarSatMax_Scroll(object sender, EventArgs e)
+        {
+            numericUpDownSatMax.Value = trackBarSatMax.Value;
+        }
+
+        private void numericUpDownSatMin_ValueChanged(object sender, EventArgs e)
+        {
+            trackBarSatMin.Value = (int)numericUpDownSatMin.Value;
+        }
+
+        private void numericUpDownSatMax_ValueChanged(object sender, EventArgs e)
+        {
+            trackBarSatMax.Value = (int)numericUpDownSatMax.Value;
+        }
+
+        private void trackBarValueMin_Scroll(object sender, EventArgs e)
+        {
+            numericUpDownValueMin.Value = trackBarValueMin.Value;
+        }
+
+        private void trackBarValueMax_Scroll(object sender, EventArgs e)
+        {
+            numericUpDownValueMax.Value = trackBarValueMax.Value;
+        }
+
+        private void numericUpDownValueMin_ValueChanged(object sender, EventArgs e)
+        {
+            trackBarValueMin.Value = (int)numericUpDownValueMin.Value;
+        }
+
+        private void numericUpDownValueMax_ValueChanged(object sender, EventArgs e)
+        {
+            trackBarValueMax.Value = (int)numericUpDownValueMax.Value;
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            SaveParameters();
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
+        private void btnReset_Click(object sender, EventArgs e)
+        {
+            // 重置为默认值
+            HSVParameters.HueMin = 0;
+            HSVParameters.HueMax = 180;
+            HSVParameters.SaturationMin = 0;
+            HSVParameters.SaturationMax = 255;
+            HSVParameters.ValueMin = 0;
+            HSVParameters.ValueMax = 255;
+            HSVParameters.MinArea = 100;
+            HSVParameters.MaxArea = 100000;
+            LoadParameters();
         }
     }
 
@@ -512,11 +629,21 @@ namespace Multiobject_Sorting
             InitializeComponent();
         }
 
-        private void OKButton_Click(object sender, EventArgs e)
+        private void btnOK_Click(object sender, EventArgs e)
         {
-            // 从文本框获取真实世界坐标
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            try
+            {
+                // 从文本框获取真实世界坐标
+                RealX = double.Parse(textBoxRealX.Text);
+                RealY = double.Parse(textBoxRealY.Text);
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("请输入有效的数字！", "输入错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                textBoxRealX.Focus();
+            }
         }
     }
 
@@ -529,11 +656,135 @@ namespace Multiobject_Sorting
         {
             InitializeComponent();
             plcComm = communication;
+            LoadDefaultValues();
         }
 
-        private async void ConnectButton_Click(object sender, EventArgs e)
+        private void LoadDefaultValues()
         {
-            // 根据选择的通信类型连接PLC
+            // 设置默认值
+            radioButtonTCPIP.Checked = true;
+            textBoxIPAddress.Text = "192.168.1.100";
+            textBoxPort.Text = "502";
+            
+            comboBoxComPort.SelectedIndex = 0;  // COM1
+            comboBoxBaudRate.SelectedIndex = 0; // 9600
+            comboBoxParity.SelectedIndex = 0;   // None
+            
+            numericUpDownSlaveID.Value = 1;
+            
+            UpdateControlStates();
+        }
+
+        private void radioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateControlStates();
+        }
+
+        private void UpdateControlStates()
+        {
+            if (radioButtonTCPIP.Checked || radioButtonModbusTCP.Checked)
+            {
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = false;
+                groupBox4.Enabled = radioButtonModbusTCP.Checked;
+            }
+            else if (radioButtonModbusRTU.Checked)
+            {
+                groupBox2.Enabled = false;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+            }
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 根据选择的通信类型配置PLC
+                if (radioButtonTCPIP.Checked)
+                {
+                    plcComm.InitializeTCPIP(textBoxIPAddress.Text, int.Parse(textBoxPort.Text));
+                }
+                else if (radioButtonModbusRTU.Checked)
+                {
+                    var parity = GetSelectedParity();
+                    plcComm.InitializeModbus(PLCCommunication.CommunicationType.Modbus_RTU, (byte)numericUpDownSlaveID.Value);
+                }
+                else if (radioButtonModbusTCP.Checked)
+                {
+                    plcComm.InitializeModbus(PLCCommunication.CommunicationType.Modbus_TCP, (byte)numericUpDownSlaveID.Value);
+                }
+
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"配置失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private System.IO.Ports.Parity GetSelectedParity()
+        {
+            switch (comboBoxParity.SelectedIndex)
+            {
+                case 0: return System.IO.Ports.Parity.None;
+                case 1: return System.IO.Ports.Parity.Odd;
+                case 2: return System.IO.Ports.Parity.Even;
+                case 3: return System.IO.Ports.Parity.Mark;
+                case 4: return System.IO.Ports.Parity.Space;
+                default: return System.IO.Ports.Parity.None;
+            }
+        }
+
+        private async void btnTest_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                btnTest.Enabled = false;
+                btnTest.Text = "测试中...";
+
+                // 临时配置用于测试
+                var tempPLC = new PLCCommunication();
+                bool success = false;
+
+                if (radioButtonTCPIP.Checked)
+                {
+                    tempPLC.InitializeTCPIP(textBoxIPAddress.Text, int.Parse(textBoxPort.Text));
+                    success = await tempPLC.ConnectAsync();
+                }
+                else if (radioButtonModbusRTU.Checked)
+                {
+                    tempPLC.InitializeModbus(PLCCommunication.CommunicationType.Modbus_RTU, (byte)numericUpDownSlaveID.Value);
+                    success = await tempPLC.ConnectAsync(comboBoxComPort.Text, int.Parse(comboBoxBaudRate.Text));
+                }
+                else if (radioButtonModbusTCP.Checked)
+                {
+                    tempPLC.InitializeModbus(PLCCommunication.CommunicationType.Modbus_TCP, (byte)numericUpDownSlaveID.Value);
+                    success = await tempPLC.ConnectAsync(textBoxIPAddress.Text, int.Parse(textBoxPort.Text));
+                }
+
+                if (success)
+                {
+                    MessageBox.Show("连接测试成功！", "测试结果", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    tempPLC.Disconnect();
+                }
+                else
+                {
+                    MessageBox.Show("连接测试失败！请检查配置参数。", "测试结果", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                tempPLC.Dispose();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"测试失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnTest.Enabled = true;
+                btnTest.Text = "测试连接";
+            }
         }
     }
 }
