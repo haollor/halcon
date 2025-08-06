@@ -469,12 +469,88 @@ namespace Multiobject_Sorting
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // 保留原有的事件处理器
+            // 当选择检测结果列表中的项目时，在图像中高亮显示对应的检测对象
+            if (listViewResults.SelectedItems.Count > 0)
+            {
+                try
+                {
+                    int selectedIndex = listViewResults.SelectedItems[0].Index;
+                    if (selectedIndex >= 0 && selectedIndex < lastDetectionResults.Count)
+                    {
+                        var selectedResult = lastDetectionResults[selectedIndex];
+                        
+                        // 在状态栏显示选中对象的详细信息
+                        UpdateStatus($"选中对象 #{selectedIndex + 1}: " +
+                                   $"位置({selectedResult.CenterX:F2}, {selectedResult.CenterY:F2}), " +
+                                   $"角度{selectedResult.Angle:F2}°, " +
+                                   $"面积{selectedResult.Area:F0}, " +
+                                   $"类型{selectedResult.ObjectType}");
+                        
+                        // 如果有Halcon显示窗口，可以在图像中高亮显示选中的对象
+                        if (halconWrapper != null)
+                        {
+                            halconWrapper.HighlightDetectedObject(selectedResult);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatus($"选择项目时出错: {ex.Message}");
+                }
+            }
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            // 保留原有的事件处理器
+            // 处理标定数据网格的单元格点击事件
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                try
+                {
+                    var selectedRow = dataGridView1.Rows[e.RowIndex];
+                    
+                    // 获取当前行的标定点数据
+                    if (selectedRow.Cells.Count >= 4)
+                    {
+                        double imageX = double.Parse(selectedRow.Cells[0].Value?.ToString() ?? "0");
+                        double imageY = double.Parse(selectedRow.Cells[1].Value?.ToString() ?? "0");
+                        double realX = double.Parse(selectedRow.Cells[2].Value?.ToString() ?? "0");
+                        double realY = double.Parse(selectedRow.Cells[3].Value?.ToString() ?? "0");
+                        
+                        UpdateStatus($"选中标定点: 图像坐标({imageX:F2}, {imageY:F2}) -> 真实坐标({realX:F2}, {realY:F2})");
+                        
+                        // 显示上下文菜单，允许删除或编辑标定点
+                        var result = MessageBox.Show(
+                            $"标定点操作：\n图像坐标: ({imageX:F2}, {imageY:F2})\n真实坐标: ({realX:F2}, {realY:F2})\n\n点击'是'删除，'否'编辑，'取消'退出",
+                            "标定点操作",
+                            MessageBoxButtons.YesNoCancel,
+                            MessageBoxIcon.Question);
+                            
+                        if (result == DialogResult.Yes)
+                        {
+                            // 删除标定点
+                            calibration.RemoveCalibrationPoint(e.RowIndex);
+                            UpdateCalibrationGrid();
+                            UpdateStatus($"已删除标定点 #{e.RowIndex + 1}");
+                        }
+                        else if (result == DialogResult.No)
+                        {
+                            // 编辑标定点
+                            var form = new CalibrationPointForm(realX, realY);
+                            if (form.ShowDialog() == DialogResult.OK)
+                            {
+                                calibration.UpdateCalibrationPoint(e.RowIndex, imageX, imageY, form.RealX, form.RealY);
+                                UpdateCalibrationGrid();
+                                UpdateStatus($"已更新标定点 #{e.RowIndex + 1}");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatus($"处理标定点时出错: {ex.Message}");
+                }
+            }
         }
     }
 
@@ -524,6 +600,12 @@ namespace Multiobject_Sorting
         public CalibrationPointForm()
         {
             InitializeComponent();
+        }
+
+        public CalibrationPointForm(double currentRealX, double currentRealY) : this()
+        {
+            RealX = currentRealX;
+            RealY = currentRealY;
         }
 
         private void InitializeComponent()

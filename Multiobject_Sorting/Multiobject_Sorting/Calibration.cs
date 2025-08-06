@@ -432,6 +432,74 @@ namespace Multiobject_Sorting
             return transformMatrix;
         }
 
+        /// <summary>
+        /// 移除指定索引的标定点
+        /// </summary>
+        /// <param name="index">要移除的标定点索引</param>
+        /// <returns>移除是否成功</returns>
+        public bool RemoveCalibrationPoint(int index)
+        {
+            try
+            {
+                if (index >= 0 && index < calibrationPoints.Count)
+                {
+                    calibrationPoints.RemoveAt(index);
+                    
+                    // 如果移除后标定点少于4个，则标定失效
+                    if (calibrationPoints.Count < 4)
+                    {
+                        isCalibrated = false;
+                        transformMatrix = new TransformationMatrix();
+                    }
+                    else
+                    {
+                        // 重新计算标定
+                        PerformCalibration();
+                    }
+                    
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 更新指定索引的标定点
+        /// </summary>
+        /// <param name="index">标定点索引</param>
+        /// <param name="imageX">图像X坐标</param>
+        /// <param name="imageY">图像Y坐标</param>
+        /// <param name="realX">真实世界X坐标</param>
+        /// <param name="realY">真实世界Y坐标</param>
+        /// <returns>更新是否成功</returns>
+        public bool UpdateCalibrationPoint(int index, double imageX, double imageY, double realX, double realY)
+        {
+            try
+            {
+                if (index >= 0 && index < calibrationPoints.Count)
+                {
+                    calibrationPoints[index] = new CalibrationPoint(imageX, imageY, realX, realY);
+                    
+                    // 重新计算标定
+                    if (calibrationPoints.Count >= 4)
+                    {
+                        PerformCalibration();
+                    }
+                    
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         // 序列化辅助类
         [Serializable]
         public class CalibrationData

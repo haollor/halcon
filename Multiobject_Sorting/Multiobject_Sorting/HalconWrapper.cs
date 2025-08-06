@@ -264,6 +264,55 @@ namespace Multiobject_Sorting
         }
 
         /// <summary>
+        /// 在图像中高亮显示选中的检测对象
+        /// </summary>
+        /// <param name="detectionResult">要高亮显示的检测结果</param>
+        public void HighlightDetectedObject(DetectionResult detectionResult)
+        {
+            try
+            {
+                if (hWindow == null || detectionResult == null) return;
+
+                // 设置绘制颜色为红色
+                HOperatorSet.SetColor(hWindow, "red");
+                HOperatorSet.SetLineWidth(hWindow, 3);
+
+                // 绘制十字标记在对象中心
+                double crossSize = 20;
+                HOperatorSet.DispLine(hWindow, 
+                    detectionResult.CenterY - crossSize, detectionResult.CenterX - crossSize,
+                    detectionResult.CenterY + crossSize, detectionResult.CenterX + crossSize);
+                HOperatorSet.DispLine(hWindow, 
+                    detectionResult.CenterY - crossSize, detectionResult.CenterX + crossSize,
+                    detectionResult.CenterY + crossSize, detectionResult.CenterX - crossSize);
+
+                // 绘制边界矩形（如果有宽度和高度信息）
+                if (detectionResult.Width > 0 && detectionResult.Height > 0)
+                {
+                    double halfWidth = detectionResult.Width / 2;
+                    double halfHeight = detectionResult.Height / 2;
+                    
+                    HOperatorSet.DispRectangle1(hWindow,
+                        detectionResult.CenterY - halfHeight,
+                        detectionResult.CenterX - halfWidth,
+                        detectionResult.CenterY + halfHeight,
+                        detectionResult.CenterX + halfWidth);
+                }
+
+                // 显示对象信息文本
+                HOperatorSet.SetColor(hWindow, "yellow");
+                string infoText = $"{detectionResult.ObjectType}\n({detectionResult.CenterX:F1},{detectionResult.CenterY:F1})\n角度:{detectionResult.Angle:F1}°";
+                HOperatorSet.DispText(hWindow, infoText, "window", 
+                    detectionResult.CenterY + 30, detectionResult.CenterX, "black", "box", "false");
+            }
+            catch (Exception ex)
+            {
+                // 忽略绘制错误，不影响主要功能
+                System.Diagnostics.Debug.WriteLine($"高亮显示对象时出错: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// 释放资源
         /// </summary>
         public void Dispose()
