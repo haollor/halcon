@@ -469,12 +469,185 @@ namespace Multiobject_Sorting
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // 保留原有的事件处理器
+            // 检测结果列表选择改变事件处理
+            if (listViewResults.SelectedItems.Count > 0)
+            {
+                var selectedItem = listViewResults.SelectedItems[0];
+                int index = selectedItem.Index;
+                
+                if (index < lastDetectionResults.Count)
+                {
+                    var result = lastDetectionResults[index];
+                    
+                    // 在Halcon窗口中高亮显示选中的检测目标
+                    try
+                    {
+                        var hWindow = hWindowControl1.HalconWindow;
+                        
+                        // 清除之前的高亮
+                        HOperatorSet.SetColor(hWindow, "yellow");
+                        HOperatorSet.SetLineWidth(hWindow, 3);
+                        
+                        // 绘制高亮圆圈
+                        HOperatorSet.DispCircle(hWindow, result.CenterY, result.CenterX, 20);
+                        
+                        // 显示详细信息在状态栏
+                        UpdateStatus($"选中目标 {index + 1}: X={result.CenterX:F2}, Y={result.CenterY:F2}, " +
+                                   $"角度={result.Angle:F2}°, 面积={result.Area:F0}, 类型={result.ObjectType}");
+                    }
+                    catch (Exception ex)
+                    {
+                        UpdateStatus($"显示高亮失败: {ex.Message}");
+                    }
+                }
+            }
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            // 保留原有的事件处理器
+            // 标定点数据表格单元格点击事件处理
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                try
+                {
+                    var calibPoints = calibration.GetCalibrationPoints();
+                    
+                    if (e.RowIndex < calibPoints.Count)
+                    {
+                        var point = calibPoints[e.RowIndex];
+                        
+                        // 在Halcon窗口中显示选中的标定点
+                        var hWindow = hWindowControl1.HalconWindow;
+                        
+                        // 设置显示样式
+                        HOperatorSet.SetColor(hWindow, "blue");
+                        HOperatorSet.SetLineWidth(hWindow, 2);
+                        
+                        // 绘制标定点标记
+                        HOperatorSet.DispCross(hWindow, point.ImageY, point.ImageX, 15, 0);
+                        
+                        // 显示标定点信息
+                        string info = $"标定点 {e.RowIndex + 1}: 图像({point.ImageX:F1},{point.ImageY:F1}) → " +
+                                    $"真实({point.RealX:F2},{point.RealY:F2})";
+                        HOperatorSet.SetTposition(hWindow, (int)point.ImageY - 25, (int)point.ImageX - 50);
+                        HOperatorSet.WriteString(hWindow, $"P{e.RowIndex + 1}");
+                        
+                        UpdateStatus(info);
+                        
+                        // 可以通过按住Ctrl键点击来删除标定点
+                        if (ModifierKeys == Keys.Control)
+                        {
+                            var result = MessageBox.Show($"是否删除标定点 {e.RowIndex + 1}？\n{info}", 
+                                                       "删除标定点", 
+                                                       MessageBoxButtons.YesNo, 
+                                                       MessageBoxIcon.Question);
+                            
+                            if (result == DialogResult.Yes)
+                            {
+                                RemoveCalibrationPoint(e.RowIndex);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatus($"处理标定点点击失败: {ex.Message}");
+                }
+            }
+        }
+
+        // 辅助方法：删除标定点
+        private void RemoveCalibrationPoint(int index)
+        {
+            try
+            {
+                var points = calibration.GetCalibrationPoints();
+                if (index >= 0 && index < points.Count)
+                {
+                    // 重新创建标定对象并添加除了指定索引外的所有点
+                    calibration.ClearCalibrationPoints();
+                    
+                    for (int i = 0; i < points.Count; i++)
+                    {
+                        if (i != index)
+                        {
+                            var point = points[i];
+                            calibration.AddCalibrationPoint(point.ImageX, point.ImageY, point.RealX, point.RealY);
+                        }
+                    }
+                    
+                    // 更新显示
+                    UpdateCalibrationGrid();
+                    UpdateStatus($"已删除标定点 {index + 1}");
+                    
+                    // 如果标定点数量改变，可能需要重新标定
+                    if (calibration.IsCalibrated() && calibration.GetCalibrationPointCount() >= 4)
+                    {
+                        var result = MessageBox.Show("标定点已改变，是否重新执行标定？", 
+                                                    "重新标定", 
+                                                    MessageBoxButtons.YesNo, 
+                                                    MessageBoxIcon.Question);
+                        if (result == DialogResult.Yes)
+                        {
+                            PerformCalibration();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"删除标定点失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 辅助方法：双击标定点进行编辑
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 2) // 只允许编辑真实坐标列
+            {
+                try
+                {
+                    var points = calibration.GetCalibrationPoints();
+                    if (e.RowIndex < points.Count)
+                    {
+                        var point = points[e.RowIndex];
+                        
+                        // 创建编辑对话框
+                        var editForm = new CalibrationPointForm();
+                        
+                        // 预填充当前值
+                        editForm.Controls.OfType<TextBox>().FirstOrDefault(t => t.Name == "textBoxRealX").Text = point.RealX.ToString("F2");
+                        editForm.Controls.OfType<TextBox>().FirstOrDefault(t => t.Name == "textBoxRealY").Text = point.RealY.ToString("F2");
+                        
+                        if (editForm.ShowDialog() == DialogResult.OK)
+                        {
+                            // 更新标定点
+                            calibration.ClearCalibrationPoints();
+                            
+                            for (int i = 0; i < points.Count; i++)
+                            {
+                                var pt = points[i];
+                                if (i == e.RowIndex)
+                                {
+                                    // 使用新的真实坐标
+                                    calibration.AddCalibrationPoint(pt.ImageX, pt.ImageY, editForm.RealX, editForm.RealY);
+                                }
+                                else
+                                {
+                                    calibration.AddCalibrationPoint(pt.ImageX, pt.ImageY, pt.RealX, pt.RealY);
+                                }
+                            }
+                            
+                            UpdateCalibrationGrid();
+                            UpdateStatus($"已更新标定点 {e.RowIndex + 1}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"编辑标定点失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 
