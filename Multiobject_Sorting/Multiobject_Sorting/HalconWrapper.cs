@@ -121,16 +121,8 @@ namespace Multiobject_Sorting
                 // 获取窗口尺寸
                 HOperatorSet.GetWindowExtents(hWindow, out HTuple row, out HTuple column, out HTuple windowWidth, out HTuple windowHeight);
 
-                // 计算缩放比例以适应窗口
-                double scaleX = (double)windowWidth / imageWidth;
-                double scaleY = (double)windowHeight / imageHeight;
-                double scale = Math.Min(scaleX, scaleY);
-
-                // 计算显示区域
-                int displayWidth = (int)(imageWidth * scale);
-                int displayHeight = (int)(imageHeight * scale);
-                
-                // 设置图像部分以完整显示
+                // 设置图像部分以完整显示图像
+                // -1参数表示自动调整到图像的完整尺寸
                 HOperatorSet.SetPart(hWindow, 0, 0, imageHeight - 1, imageWidth - 1);
                 
                 // 清空窗口
@@ -138,6 +130,9 @@ namespace Multiobject_Sorting
                 
                 // 显示图像
                 HOperatorSet.DispObj(currentImage, hWindow);
+                
+                // 调试信息
+                System.Diagnostics.Debug.WriteLine($"图像尺寸: {imageWidth}x{imageHeight}, 窗口尺寸: {windowWidth}x{windowHeight}");
             }
             catch (Exception ex)
             {
@@ -146,6 +141,7 @@ namespace Multiobject_Sorting
                 try
                 {
                     HOperatorSet.SetPart(hWindow, 0, 0, -1, -1);
+                    HOperatorSet.ClearWindow(hWindow);
                     HOperatorSet.DispObj(currentImage, hWindow);
                 }
                 catch { }

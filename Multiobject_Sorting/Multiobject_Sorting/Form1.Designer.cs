@@ -31,6 +31,7 @@ namespace Multiobject_Sorting
             this.hWindowControl1 = new HalconDotNet.HWindowControl();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.splitter1 = new System.Windows.Forms.Splitter();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnLoadImage = new System.Windows.Forms.Button();
             this.btnGrabCamera = new System.Windows.Forms.Button();
@@ -66,12 +67,10 @@ namespace Multiobject_Sorting
             this.hWindowControl1.ImagePart = new System.Drawing.Rectangle(0, 0, 640, 480);
             this.hWindowControl1.Location = new System.Drawing.Point(12, 12);
             this.hWindowControl1.Name = "hWindowControl1";
-            this.hWindowControl1.Size = new System.Drawing.Size(640, 480);
+            this.hWindowControl1.Size = new System.Drawing.Size(700, 520);
             this.hWindowControl1.TabIndex = 0;
-            this.hWindowControl1.WindowSize = new System.Drawing.Size(640, 480);
-            this.hWindowControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.hWindowControl1.WindowSize = new System.Drawing.Size(700, 520);
+            this.hWindowControl1.Dock = System.Windows.Forms.DockStyle.Left;
             this.hWindowControl1.HMouseDown += new HalconDotNet.HMouseEventHandler(this.hWindowControl1_HMouseDown);
             // 
             // dataGridView1
@@ -80,7 +79,7 @@ namespace Multiobject_Sorting
             this.dataGridView1.Location = new System.Drawing.Point(6, 20);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 27;
-            this.dataGridView1.Size = new System.Drawing.Size(450, 200);
+            this.dataGridView1.Size = new System.Drawing.Size(480, 200);
             this.dataGridView1.TabIndex = 1;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
@@ -90,9 +89,10 @@ namespace Multiobject_Sorting
             this.panel1.Controls.Add(this.groupBox3);
             this.panel1.Controls.Add(this.groupBox2);
             this.panel1.Controls.Add(this.groupBox1);
-            this.panel1.Location = new System.Drawing.Point(658, 12);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(474, 480);
+            this.panel1.Size = new System.Drawing.Size(500, 540);
             this.panel1.TabIndex = 2;
             // 
             // groupBox1
@@ -104,7 +104,7 @@ namespace Multiobject_Sorting
             this.groupBox1.Controls.Add(this.btnLoadImage);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(468, 80);
+            this.groupBox1.Size = new System.Drawing.Size(495, 80);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "图像获取与检测";
@@ -168,7 +168,7 @@ namespace Multiobject_Sorting
             this.groupBox2.Controls.Add(this.btnStartCalib);
             this.groupBox2.Location = new System.Drawing.Point(3, 89);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(468, 260);
+            this.groupBox2.Size = new System.Drawing.Size(495, 260);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "坐标标定";
@@ -220,7 +220,7 @@ namespace Multiobject_Sorting
             this.groupBox3.Controls.Add(this.btnPLCConfig);
             this.groupBox3.Location = new System.Drawing.Point(3, 355);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(468, 60);
+            this.groupBox3.Size = new System.Drawing.Size(495, 60);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "PLC通信";
@@ -259,11 +259,19 @@ namespace Multiobject_Sorting
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 528);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 574);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1144, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(1250, 26);
             this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
+            // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(700, 0);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(3, 574);
+            this.splitter1.TabIndex = 4;
+            this.splitter1.TabStop = false;
             // 
             // toolStripStatusLabel1
             // 
@@ -278,7 +286,7 @@ namespace Multiobject_Sorting
             this.listViewResults.HideSelection = false;
             this.listViewResults.Location = new System.Drawing.Point(6, 20);
             this.listViewResults.Name = "listViewResults";
-            this.listViewResults.Size = new System.Drawing.Size(450, 100);
+            this.listViewResults.Size = new System.Drawing.Size(485, 120);
             this.listViewResults.TabIndex = 3;
             this.listViewResults.UseCompatibleStateImageBehavior = false;
             this.listViewResults.View = System.Windows.Forms.View.Details;
@@ -287,9 +295,9 @@ namespace Multiobject_Sorting
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.listViewResults);
-            this.groupBox4.Location = new System.Drawing.Point(3, 421);
+            this.groupBox4.Location = new System.Drawing.Point(3, 415);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(468, 130);
+            this.groupBox4.Size = new System.Drawing.Size(500, 150);
             this.groupBox4.TabIndex = 3;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "检测结果";
@@ -298,12 +306,14 @@ namespace Multiobject_Sorting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1144, 554);
-            this.Controls.Add(this.statusStrip1);
+            this.ClientSize = new System.Drawing.Size(1250, 600);
             this.Controls.Add(this.panel1);
+            this.Controls.Add(this.splitter1);
             this.Controls.Add(this.hWindowControl1);
+            this.Controls.Add(this.statusStrip1);
             this.Name = "Form1";
             this.Text = "多目标检测与分拣系统";
+            this.MinimumSize = new System.Drawing.Size(1200, 550);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.panel1.ResumeLayout(false);
@@ -324,6 +334,7 @@ namespace Multiobject_Sorting
         private HalconDotNet.HWindowControl hWindowControl1;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button btnAutoMode;
         private System.Windows.Forms.Button btnDetect;

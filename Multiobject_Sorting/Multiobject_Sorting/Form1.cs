@@ -90,7 +90,16 @@ namespace Multiobject_Sorting
             {
                 try
                 {
-                    halconWrapper.RefreshDisplay();
+                    // 延迟刷新，确保控件完全调整大小后再显示
+                    var timer = new System.Windows.Forms.Timer();
+                    timer.Interval = 100;
+                    timer.Tick += (s, args) =>
+                    {
+                        halconWrapper.RefreshDisplay();
+                        timer.Stop();
+                        timer.Dispose();
+                    };
+                    timer.Start();
                 }
                 catch { }
             }
@@ -111,12 +120,19 @@ namespace Multiobject_Sorting
         private void InitControls()
         {
             // 初始化检测结果ListView
-            listViewResults.Columns.Add("序号", 60);
-            listViewResults.Columns.Add("X坐标", 80);
-            listViewResults.Columns.Add("Y坐标", 80);
+            listViewResults.Columns.Add("序号", 50);
+            listViewResults.Columns.Add("X坐标", 75);
+            listViewResults.Columns.Add("Y坐标", 75);
             listViewResults.Columns.Add("角度", 60);
-            listViewResults.Columns.Add("面积", 80);
+            listViewResults.Columns.Add("面积", 70);
             listViewResults.Columns.Add("类型", 80);
+            
+            // 设置ListView的详细属性
+            listViewResults.FullRowSelect = true;
+            listViewResults.GridLines = true;
+            listViewResults.MultiSelect = false;
+            listViewResults.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+            listViewResults.Scrollable = true;
         }
 
         // 按钮事件处理器
