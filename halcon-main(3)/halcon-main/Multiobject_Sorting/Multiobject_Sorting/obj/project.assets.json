@@ -1,0 +1,182 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.6.1": {
+      "NModbus/3.0.81": {
+        "type": "package",
+        "compile": {
+          "lib/net46/NModbus.dll": {}
+        },
+        "runtime": {
+          "lib/net46/NModbus.dll": {}
+        }
+      },
+      "NModbus4/2.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net40/NModbus4.dll": {}
+        },
+        "runtime": {
+          "lib/net40/NModbus4.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6.1/win": {
+      "NModbus/3.0.81": {
+        "type": "package",
+        "compile": {
+          "lib/net46/NModbus.dll": {}
+        },
+        "runtime": {
+          "lib/net46/NModbus.dll": {}
+        }
+      },
+      "NModbus4/2.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net40/NModbus4.dll": {}
+        },
+        "runtime": {
+          "lib/net40/NModbus4.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6.1/win-x64": {
+      "NModbus/3.0.81": {
+        "type": "package",
+        "compile": {
+          "lib/net46/NModbus.dll": {}
+        },
+        "runtime": {
+          "lib/net46/NModbus.dll": {}
+        }
+      },
+      "NModbus4/2.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net40/NModbus4.dll": {}
+        },
+        "runtime": {
+          "lib/net40/NModbus4.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6.1/win-x86": {
+      "NModbus/3.0.81": {
+        "type": "package",
+        "compile": {
+          "lib/net46/NModbus.dll": {}
+        },
+        "runtime": {
+          "lib/net46/NModbus.dll": {}
+        }
+      },
+      "NModbus4/2.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net40/NModbus4.dll": {}
+        },
+        "runtime": {
+          "lib/net40/NModbus4.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "NModbus/3.0.81": {
+      "sha512": "cx16R1DfTj/tIv5mlarng+D90on2mrvoDIAkXeHx9iIyxpNmfclc/JTnIDlqC2r6sZqscKB4DPlRlPDmOoU/WQ==",
+      "type": "package",
+      "path": "nmodbus/3.0.81",
+      "files": [
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net46/NModbus.dll",
+        "lib/net46/NModbus.xml",
+        "lib/net6.0/NModbus.dll",
+        "lib/net6.0/NModbus.xml",
+        "lib/netstandard1.3/NModbus.dll",
+        "lib/netstandard1.3/NModbus.xml",
+        "lib/netstandard2.0/NModbus.dll",
+        "lib/netstandard2.0/NModbus.xml",
+        "nmodbus.3.0.81.nupkg.sha512",
+        "nmodbus.nuspec"
+      ]
+    },
+    "NModbus4/2.1.0": {
+      "sha512": "5sfzhTQ4GiRurNRxDY5+bJXkg5s0ObE+t2DAPdbHjVTnpLJeuFBv689OIOYjBa9UfAlv2n9pL6QQWDtiEgDoww==",
+      "type": "package",
+      "path": "nmodbus4/2.1.0",
+      "files": [
+        ".signature.p7s",
+        "NModbus4.pdb",
+        "lib/net40/NModbus4.dll",
+        "lib/net40/NModbus4.xml",
+        "nmodbus4.2.1.0.nupkg.sha512",
+        "nmodbus4.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.6.1": [
+      "NModbus >= 3.0.81",
+      "NModbus4 >= 2.1.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\luhao\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\luhao\\Downloads\\halcon-main(3)\\halcon-main\\Multiobject_Sorting\\Multiobject_Sorting\\Multiobject_Sorting.csproj",
+      "projectName": "Multiobject_Sorting",
+      "projectPath": "C:\\Users\\luhao\\Downloads\\halcon-main(3)\\halcon-main\\Multiobject_Sorting\\Multiobject_Sorting\\Multiobject_Sorting.csproj",
+      "packagesPath": "C:\\Users\\luhao\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\luhao\\Downloads\\halcon-main(3)\\halcon-main\\Multiobject_Sorting\\Multiobject_Sorting\\obj\\",
+      "projectStyle": "PackageReference",
+      "skipContentFileWrite": true,
+      "configFilePaths": [
+        "C:\\Users\\luhao\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net461"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net461": {
+          "projectReferences": {}
+        }
+      }
+    },
+    "frameworks": {
+      "net461": {
+        "dependencies": {
+          "NModbus": {
+            "target": "Package",
+            "version": "[3.0.81, )"
+          },
+          "NModbus4": {
+            "target": "Package",
+            "version": "[2.1.0, )"
+          }
+        }
+      }
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      },
+      "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
+        "#import": []
+      }
+    }
+  }
+}
