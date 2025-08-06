@@ -58,11 +58,41 @@ namespace Multiobject_Sorting
                 autoDetectionTimer.Interval = 1000; // 1秒检测一次
                 autoDetectionTimer.Tick += AutoDetectionTimer_Tick;
 
+                // 添加窗口大小变化事件处理
+                this.Resize += Form1_Resize;
+                hWindowControl1.Resize += HWindowControl1_Resize;
+
                 UpdateStatus("系统初始化完成");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"系统初始化失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            // 当主窗体大小变化时，刷新图像显示
+            if (halconWrapper != null)
+            {
+                try
+                {
+                    halconWrapper.RefreshDisplay();
+                }
+                catch { }
+            }
+        }
+
+        private void HWindowControl1_Resize(object sender, EventArgs e)
+        {
+            // 当HWindowControl大小变化时，刷新图像显示
+            if (halconWrapper != null)
+            {
+                try
+                {
+                    halconWrapper.RefreshDisplay();
+                }
+                catch { }
             }
         }
 
@@ -445,9 +475,37 @@ namespace Multiobject_Sorting
         // 鼠标点击事件处理（用于标定）
         private void hWindowControl1_HMouseDown(object sender, HalconDotNet.HMouseEventArgs e)
         {
-            if (isCalibrationMode)
+            try
             {
-                AddCalibrationPoint(e.X, e.Y);
+                if (isCalibrationMode)
+                {
+                    // 在图像上标记点击位置
+                    if (halconWrapper != null)
+                    {
+                        // 绘制一个小十字标记选择的点
+                        var hWindow = hWindowControl1.HalconWindow;
+                        HOperatorSet.SetColor(hWindow, "red");
+                        HOperatorSet.SetLineWidth(hWindow, 2);
+                        HOperatorSet.DispCross(hWindow, e.Y, e.X, 12, 0);
+                        
+                        // 显示坐标信息
+                        string coordText = $"({e.X:F1},{e.Y:F1})";
+                        HOperatorSet.SetColor(hWindow, "yellow");
+                        HOperatorSet.DispText(hWindow, coordText, "window", e.Y + 15, e.X - 30, "black", "box", "false");
+                    }
+                    
+                    AddCalibrationPoint(e.X, e.Y);
+                    UpdateStatus($"选择标定点: 图像坐标({e.X:F1}, {e.Y:F1})");
+                }
+                else
+                {
+                    // 非标定模式下，显示点击位置的坐标
+                    UpdateStatus($"图像坐标: ({e.X:F1}, {e.Y:F1})");
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"鼠标点击处理出错: {ex.Message}");
             }
         }
 
@@ -559,35 +617,184 @@ namespace Multiobject_Sorting
     {
         public HalconWrapper.HSVParameters HSVParameters { get; private set; }
 
+        private TrackBar trackBarHueMin, trackBarHueMax;
+        private TrackBar trackBarSatMin, trackBarSatMax;
+        private TrackBar trackBarValMin, trackBarValMax;
+        private TextBox textBoxMinArea, textBoxMaxArea;
+        private Label lblHueMin, lblHueMax, lblSatMin, lblSatMax, lblValMin, lblValMax;
+        private Button btnOK, btnCancel, btnPreview;
+
         public HSVParameterForm(HalconWrapper.HSVParameters currentParams)
         {
+            HSVParameters = new HalconWrapper.HSVParameters
+            {
+                HueMin = currentParams.HueMin,
+                HueMax = currentParams.HueMax,
+                SaturationMin = currentParams.SaturationMin,
+                SaturationMax = currentParams.SaturationMax,
+                ValueMin = currentParams.ValueMin,
+                ValueMax = currentParams.ValueMax,
+                MinArea = currentParams.MinArea,
+                MaxArea = currentParams.MaxArea
+            };
             InitializeComponent();
-            HSVParameters = currentParams;
             LoadParameters();
         }
 
         private void InitializeComponent()
         {
             this.SuspendLayout();
-            // 
-            // HSVParameterForm
-            // 
+
+            // 设置窗体属性
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(400, 300);
+            this.ClientSize = new System.Drawing.Size(480, 400);
             this.Name = "HSVParameterForm";
             this.Text = "HSV参数设置";
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.StartPosition = FormStartPosition.CenterParent;
+
+            int yPos = 20;
+            int labelWidth = 80;
+            int trackBarWidth = 200;
+            int valueWidth = 60;
+
+            // Hue参数
+            var lblHue = new Label { Text = "色调(H):", Location = new Point(20, yPos), Size = new Size(labelWidth, 20) };
+            this.Controls.Add(lblHue);
+
+            lblHueMin = new Label { Text = "0", Location = new Point(20 + labelWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
+            trackBarHueMin = new TrackBar { Location = new Point(20 + labelWidth + 10 + valueWidth, yPos + 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 180, TickFrequency = 20 };
+            lblHueMax = new Label { Text = "180", Location = new Point(20 + labelWidth + 10 + valueWidth + trackBarWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
+            trackBarHueMax = new TrackBar { Location = new Point(20 + labelWidth + 10, yPos + 50), Size = new Size(trackBarWidth + valueWidth, 30), Minimum = 0, Maximum = 180, TickFrequency = 20 };
+
+            trackBarHueMin.ValueChanged += (s, e) => { lblHueMin.Text = trackBarHueMin.Value.ToString(); HSVParameters.HueMin = trackBarHueMin.Value; };
+            trackBarHueMax.ValueChanged += (s, e) => { lblHueMax.Text = trackBarHueMax.Value.ToString(); HSVParameters.HueMax = trackBarHueMax.Value; };
+
+            this.Controls.AddRange(new Control[] { lblHueMin, trackBarHueMin, lblHueMax, trackBarHueMax });
+            yPos += 90;
+
+            // Saturation参数
+            var lblSat = new Label { Text = "饱和度(S):", Location = new Point(20, yPos), Size = new Size(labelWidth, 20) };
+            this.Controls.Add(lblSat);
+
+            lblSatMin = new Label { Text = "0", Location = new Point(20 + labelWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
+            trackBarSatMin = new TrackBar { Location = new Point(20 + labelWidth + 10 + valueWidth, yPos + 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
+            lblSatMax = new Label { Text = "255", Location = new Point(20 + labelWidth + 10 + valueWidth + trackBarWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
+            trackBarSatMax = new TrackBar { Location = new Point(20 + labelWidth + 10, yPos + 50), Size = new Size(trackBarWidth + valueWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
+
+            trackBarSatMin.ValueChanged += (s, e) => { lblSatMin.Text = trackBarSatMin.Value.ToString(); HSVParameters.SaturationMin = trackBarSatMin.Value; };
+            trackBarSatMax.ValueChanged += (s, e) => { lblSatMax.Text = trackBarSatMax.Value.ToString(); HSVParameters.SaturationMax = trackBarSatMax.Value; };
+
+            this.Controls.AddRange(new Control[] { lblSatMin, trackBarSatMin, lblSatMax, trackBarSatMax });
+            yPos += 90;
+
+            // Value参数
+            var lblVal = new Label { Text = "亮度(V):", Location = new Point(20, yPos), Size = new Size(labelWidth, 20) };
+            this.Controls.Add(lblVal);
+
+            lblValMin = new Label { Text = "0", Location = new Point(20 + labelWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
+            trackBarValMin = new TrackBar { Location = new Point(20 + labelWidth + 10 + valueWidth, yPos + 20), Size = new Size(trackBarWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
+            lblValMax = new Label { Text = "255", Location = new Point(20 + labelWidth + 10 + valueWidth + trackBarWidth + 10, yPos + 25), Size = new Size(valueWidth, 20) };
+            trackBarValMax = new TrackBar { Location = new Point(20 + labelWidth + 10, yPos + 50), Size = new Size(trackBarWidth + valueWidth, 30), Minimum = 0, Maximum = 255, TickFrequency = 50 };
+
+            trackBarValMin.ValueChanged += (s, e) => { lblValMin.Text = trackBarValMin.Value.ToString(); HSVParameters.ValueMin = trackBarValMin.Value; };
+            trackBarValMax.ValueChanged += (s, e) => { lblValMax.Text = trackBarValMax.Value.ToString(); HSVParameters.ValueMax = trackBarValMax.Value; };
+
+            this.Controls.AddRange(new Control[] { lblValMin, trackBarValMin, lblValMax, trackBarValMax });
+            yPos += 90;
+
+            // 面积参数
+            var lblMinArea = new Label { Text = "最小面积:", Location = new Point(20, yPos), Size = new Size(labelWidth, 20) };
+            textBoxMinArea = new TextBox { Location = new Point(20 + labelWidth + 10, yPos), Size = new Size(100, 20) };
+            textBoxMinArea.TextChanged += (s, e) => { if (double.TryParse(textBoxMinArea.Text, out double val)) HSVParameters.MinArea = val; };
+
+            var lblMaxArea = new Label { Text = "最大面积:", Location = new Point(250, yPos), Size = new Size(labelWidth, 20) };
+            textBoxMaxArea = new TextBox { Location = new Point(250 + labelWidth + 10, yPos), Size = new Size(100, 20) };
+            textBoxMaxArea.TextChanged += (s, e) => { if (double.TryParse(textBoxMaxArea.Text, out double val)) HSVParameters.MaxArea = val; };
+
+            this.Controls.AddRange(new Control[] { lblMinArea, textBoxMinArea, lblMaxArea, textBoxMaxArea });
+            yPos += 40;
+
+            // 按钮
+            btnPreview = new Button { Text = "预览", Location = new Point(150, yPos), Size = new Size(75, 30) };
+            btnOK = new Button { Text = "确定", Location = new Point(240, yPos), Size = new Size(75, 30), DialogResult = DialogResult.OK };
+            btnCancel = new Button { Text = "取消", Location = new Point(330, yPos), Size = new Size(75, 30), DialogResult = DialogResult.Cancel };
+
+            btnOK.Click += BtnOK_Click;
+            btnCancel.Click += BtnCancel_Click;
+
+            this.Controls.AddRange(new Control[] { btnPreview, btnOK, btnCancel });
+
             this.ResumeLayout(false);
         }
 
         private void LoadParameters()
         {
-            // 这里应该加载参数到界面控件
+            trackBarHueMin.Value = HSVParameters.HueMin;
+            trackBarHueMax.Value = HSVParameters.HueMax;
+            trackBarSatMin.Value = HSVParameters.SaturationMin;
+            trackBarSatMax.Value = HSVParameters.SaturationMax;
+            trackBarValMin.Value = HSVParameters.ValueMin;
+            trackBarValMax.Value = HSVParameters.ValueMax;
+            textBoxMinArea.Text = HSVParameters.MinArea.ToString();
+            textBoxMaxArea.Text = HSVParameters.MaxArea.ToString();
+
+            // 更新标签显示
+            lblHueMin.Text = HSVParameters.HueMin.ToString();
+            lblHueMax.Text = HSVParameters.HueMax.ToString();
+            lblSatMin.Text = HSVParameters.SaturationMin.ToString();
+            lblSatMax.Text = HSVParameters.SaturationMax.ToString();
+            lblValMin.Text = HSVParameters.ValueMin.ToString();
+            lblValMax.Text = HSVParameters.ValueMax.ToString();
+        }
+
+        private void BtnOK_Click(object sender, EventArgs e)
+        {
+            SaveParameters();
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
+        private void BtnCancel_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
 
         private void SaveParameters()
         {
-            // 这里应该从界面控件保存参数
+            // 参数已经在TrackBar的ValueChanged事件中实时更新了
+            // 这里可以进行最终的验证和调整
+            if (HSVParameters.HueMin > HSVParameters.HueMax)
+            {
+                int temp = HSVParameters.HueMin;
+                HSVParameters.HueMin = HSVParameters.HueMax;
+                HSVParameters.HueMax = temp;
+            }
+
+            if (HSVParameters.SaturationMin > HSVParameters.SaturationMax)
+            {
+                int temp = HSVParameters.SaturationMin;
+                HSVParameters.SaturationMin = HSVParameters.SaturationMax;
+                HSVParameters.SaturationMax = temp;
+            }
+
+            if (HSVParameters.ValueMin > HSVParameters.ValueMax)
+            {
+                int temp = HSVParameters.ValueMin;
+                HSVParameters.ValueMin = HSVParameters.ValueMax;
+                HSVParameters.ValueMax = temp;
+            }
+
+            if (HSVParameters.MinArea > HSVParameters.MaxArea)
+            {
+                double temp = HSVParameters.MinArea;
+                HSVParameters.MinArea = HSVParameters.MaxArea;
+                HSVParameters.MaxArea = temp;
+            }
         }
     }
 
@@ -596,6 +803,10 @@ namespace Multiobject_Sorting
     {
         public double RealX { get; private set; }
         public double RealY { get; private set; }
+
+        private TextBox textBoxRealX, textBoxRealY;
+        private Label lblRealX, lblRealY, lblInstruction;
+        private Button btnOK, btnCancel;
 
         public CalibrationPointForm()
         {
@@ -606,27 +817,144 @@ namespace Multiobject_Sorting
         {
             RealX = currentRealX;
             RealY = currentRealY;
+            LoadExistingValues();
+        }
+
+        private void LoadExistingValues()
+        {
+            if (textBoxRealX != null && textBoxRealY != null)
+            {
+                textBoxRealX.Text = RealX.ToString("F2");
+                textBoxRealY.Text = RealY.ToString("F2");
+            }
         }
 
         private void InitializeComponent()
         {
             this.SuspendLayout();
-            // 
-            // CalibrationPointForm
-            // 
+
+            // 设置窗体属性
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(300, 200);
+            this.ClientSize = new System.Drawing.Size(350, 180);
             this.Name = "CalibrationPointForm";
             this.Text = "标定点输入";
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.StartPosition = FormStartPosition.CenterParent;
+
+            // 说明标签
+            lblInstruction = new Label
+            {
+                Text = "请输入此标定点对应的真实世界坐标(单位:mm):",
+                Location = new Point(20, 20),
+                Size = new Size(300, 30),
+                AutoSize = false
+            };
+            this.Controls.Add(lblInstruction);
+
+            // X坐标输入
+            lblRealX = new Label
+            {
+                Text = "真实X坐标:",
+                Location = new Point(20, 60),
+                Size = new Size(100, 20)
+            };
+            textBoxRealX = new TextBox
+            {
+                Location = new Point(130, 58),
+                Size = new Size(100, 23),
+                Text = "0.00"
+            };
+            var lblXUnit = new Label
+            {
+                Text = "mm",
+                Location = new Point(240, 60),
+                Size = new Size(30, 20)
+            };
+
+            // Y坐标输入
+            lblRealY = new Label
+            {
+                Text = "真实Y坐标:",
+                Location = new Point(20, 90),
+                Size = new Size(100, 20)
+            };
+            textBoxRealY = new TextBox
+            {
+                Location = new Point(130, 88),
+                Size = new Size(100, 23),
+                Text = "0.00"
+            };
+            var lblYUnit = new Label
+            {
+                Text = "mm",
+                Location = new Point(240, 90),
+                Size = new Size(30, 20)
+            };
+
+            // 按钮
+            btnOK = new Button
+            {
+                Text = "确定",
+                Location = new Point(130, 130),
+                Size = new Size(75, 30),
+                DialogResult = DialogResult.OK
+            };
+            btnCancel = new Button
+            {
+                Text = "取消",
+                Location = new Point(220, 130),
+                Size = new Size(75, 30),
+                DialogResult = DialogResult.Cancel
+            };
+
+            btnOK.Click += OKButton_Click;
+
+            // 添加所有控件
+            this.Controls.AddRange(new Control[] {
+                lblRealX, textBoxRealX, lblXUnit,
+                lblRealY, textBoxRealY, lblYUnit,
+                btnOK, btnCancel
+            });
+
+            // 设置默认按钮和取消按钮
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
+
             this.ResumeLayout(false);
         }
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            // 从文本框获取真实世界坐标
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            try
+            {
+                // 验证并获取真实世界坐标
+                if (!double.TryParse(textBoxRealX.Text, out double realX))
+                {
+                    MessageBox.Show("请输入有效的X坐标数值", "输入错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    textBoxRealX.Focus();
+                    return;
+                }
+
+                if (!double.TryParse(textBoxRealY.Text, out double realY))
+                {
+                    MessageBox.Show("请输入有效的Y坐标数值", "输入错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    textBoxRealY.Focus();
+                    return;
+                }
+
+                RealX = realX;
+                RealY = realY;
+
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"输入处理出错: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 
