@@ -239,7 +239,7 @@ namespace Multiobject_Sorting
         // 设置HSV参数
         private void SetHSVParameters()
         {
-            var hsvForm = new HSVParameterForm(hsvParams);
+            var hsvForm = new HSVParameterForm(hsvParams, halconWrapper);
             if (hsvForm.ShowDialog() == DialogResult.OK)
             {
                 hsvParams = hsvForm.HSVParameters;
@@ -622,9 +622,10 @@ namespace Multiobject_Sorting
         private TrackBar trackBarValMin, trackBarValMax;
         private TextBox textBoxMinArea, textBoxMaxArea;
         private Label lblHueMin, lblHueMax, lblSatMin, lblSatMax, lblValMin, lblValMax;
-        private Button btnOK, btnCancel, btnPreview;
+        private Button btnOK, btnCancel, btnPreview, btnReset;
+        private HalconWrapper parentHalconWrapper;  // 引用父窗口的HalconWrapper
 
-        public HSVParameterForm(HalconWrapper.HSVParameters currentParams)
+        public HSVParameterForm(HalconWrapper.HSVParameters currentParams, HalconWrapper halconWrapper = null)
         {
             HSVParameters = new HalconWrapper.HSVParameters
             {
@@ -637,6 +638,7 @@ namespace Multiobject_Sorting
                 MinArea = currentParams.MinArea,
                 MaxArea = currentParams.MaxArea
             };
+            parentHalconWrapper = halconWrapper;
             InitializeComponent();
             LoadParameters();
         }
@@ -648,7 +650,7 @@ namespace Multiobject_Sorting
             // 设置窗体属性
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(480, 400);
+            this.ClientSize = new System.Drawing.Size(520, 400);
             this.Name = "HSVParameterForm";
             this.Text = "HSV参数设置";
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -719,14 +721,17 @@ namespace Multiobject_Sorting
             yPos += 40;
 
             // 按钮
-            btnPreview = new Button { Text = "预览", Location = new Point(150, yPos), Size = new Size(75, 30) };
-            btnOK = new Button { Text = "确定", Location = new Point(240, yPos), Size = new Size(75, 30), DialogResult = DialogResult.OK };
-            btnCancel = new Button { Text = "取消", Location = new Point(330, yPos), Size = new Size(75, 30), DialogResult = DialogResult.Cancel };
+            btnPreview = new Button { Text = "预览", Location = new Point(80, yPos), Size = new Size(75, 30) };
+            btnReset = new Button { Text = "重置显示", Location = new Point(165, yPos), Size = new Size(75, 30) };
+            btnOK = new Button { Text = "确定", Location = new Point(250, yPos), Size = new Size(75, 30), DialogResult = DialogResult.OK };
+            btnCancel = new Button { Text = "取消", Location = new Point(335, yPos), Size = new Size(75, 30), DialogResult = DialogResult.Cancel };
 
             btnOK.Click += BtnOK_Click;
             btnCancel.Click += BtnCancel_Click;
+            btnPreview.Click += BtnPreview_Click;
+            btnReset.Click += BtnReset_Click;
 
-            this.Controls.AddRange(new Control[] { btnPreview, btnOK, btnCancel });
+            this.Controls.AddRange(new Control[] { btnPreview, btnReset, btnOK, btnCancel });
 
             this.ResumeLayout(false);
         }
@@ -762,6 +767,87 @@ namespace Multiobject_Sorting
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
+        }
+
+        private void BtnPreview_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (parentHalconWrapper == null)
+                {
+                    MessageBox.Show("无法预览：未提供图像显示窗口", "预览失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 保存当前参数
+                SaveParameters();
+
+                // 使用当前参数进行HSV颜色分割预览
+                var regions = parentHalconWrapper.HSVPreview(HSVParameters);
+                
+                // 更新状态
+                btnPreview.Text = "已预览";
+                btnPreview.BackColor = Color.LightGreen;
+                
+                // 1秒后恢复按钮状态
+                var timer = new System.Windows.Forms.Timer();
+                timer.Interval = 1000;
+                timer.Tick += (s, args) =>
+                {
+                    btnPreview.Text = "预览";
+                    btnPreview.BackColor = SystemColors.Control;
+                    timer.Stop();
+                    timer.Dispose();
+                };
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"预览失败: {ex.Message}", "预览错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                // 恢复按钮状态
+                btnPreview.Text = "预览";
+                btnPreview.BackColor = SystemColors.Control;
+            }
+        }
+
+        private void BtnReset_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (parentHalconWrapper == null)
+                {
+                    MessageBox.Show("无法重置：未提供图像显示窗口", "重置失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 刷新显示原始图像
+                parentHalconWrapper.RefreshDisplay();
+                
+                // 更新状态
+                btnReset.Text = "已重置";
+                btnReset.BackColor = Color.LightBlue;
+                
+                // 1秒后恢复按钮状态
+                var timer = new System.Windows.Forms.Timer();
+                timer.Interval = 1000;
+                timer.Tick += (s, args) =>
+                {
+                    btnReset.Text = "重置显示";
+                    btnReset.BackColor = SystemColors.Control;
+                    timer.Stop();
+                    timer.Dispose();
+                };
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"重置失败: {ex.Message}", "重置错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                // 恢复按钮状态
+                btnReset.Text = "重置显示";
+                btnReset.BackColor = SystemColors.Control;
+            }
         }
 
         private void SaveParameters()

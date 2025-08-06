@@ -188,7 +188,10 @@ namespace Multiobject_Sorting
                 // 根据面积过滤
                 HOperatorSet.SelectShape(connectedRegions, out HObject selectedRegions, "area", "and", parameters.MinArea, parameters.MaxArea);
 
-                // 显示结果
+                // 重新显示原图像
+                HOperatorSet.DispObj(currentImage, hWindow);
+                
+                // 显示分割结果
                 HOperatorSet.SetDraw(hWindow, "margin");
                 HOperatorSet.SetColor(hWindow, "red");
                 HOperatorSet.DispObj(selectedRegions, hWindow);
@@ -386,6 +389,39 @@ namespace Multiobject_Sorting
             {
                 // 忽略绘制错误，不影响主要功能
                 System.Diagnostics.Debug.WriteLine($"高亮显示对象时出错: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// HSV参数预览，显示分割结果和原图的对比
+        /// </summary>
+        /// <param name="parameters">HSV参数</param>
+        /// <returns>分割后的区域</returns>
+        public HObject HSVPreview(HSVParameters parameters)
+        {
+            if (currentImage == null)
+                throw new Exception("请先加载图像");
+
+            try
+            {
+                // 执行HSV分割
+                var selectedRegions = HSVColorSegmentation(parameters);
+                
+                // 获取分割结果的区域数量
+                HOperatorSet.CountObj(selectedRegions, out HTuple numRegions);
+                
+                // 显示统计信息
+                string statsText = $"HSV预览结果\n检测到 {numRegions.I} 个区域\nH: {parameters.HueMin}-{parameters.HueMax}\nS: {parameters.SaturationMin}-{parameters.SaturationMax}\nV: {parameters.ValueMin}-{parameters.ValueMax}\n面积: {parameters.MinArea:F0}-{parameters.MaxArea:F0}";
+                
+                HOperatorSet.SetColor(hWindow, "cyan");
+                HOperatorSet.SetTposition(hWindow, 10, 10);
+                HOperatorSet.WriteString(hWindow, statsText);
+                
+                return selectedRegions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"HSV预览失败: {ex.Message}");
             }
         }
 
