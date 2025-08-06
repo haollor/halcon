@@ -63,10 +63,48 @@ namespace Multiobject_Sorting
                 hWindowControl1.Resize += HWindowControl1_Resize;
 
                 UpdateStatus("系统初始化完成");
+                
+                // 添加测试数据到ListView以验证显示
+                AddTestDataToListView();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"系统初始化失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 添加测试数据到ListView以验证显示
+        private void AddTestDataToListView()
+        {
+            try
+            {
+                // 创建一些测试检测结果
+                lastDetectionResults = new List<HalconWrapper.DetectionResult>
+                {
+                    new HalconWrapper.DetectionResult
+                    {
+                        CenterX = 123.45,
+                        CenterY = 678.90,
+                        Angle = 45.5,
+                        Area = 1250.0,
+                        ObjectType = "圆形"
+                    },
+                    new HalconWrapper.DetectionResult
+                    {
+                        CenterX = 456.78,
+                        CenterY = 321.65,
+                        Angle = -30.2,
+                        Area = 890.5,
+                        ObjectType = "长方形"
+                    }
+                };
+                
+                UpdateDetectionResults();
+                UpdateStatus("ListView测试数据已加载");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"添加测试数据失败: {ex.Message}");
             }
         }
 
@@ -119,20 +157,29 @@ namespace Multiobject_Sorting
 
         private void InitControls()
         {
-            // 初始化检测结果ListView
-            listViewResults.Columns.Add("序号", 50);
-            listViewResults.Columns.Add("X坐标", 75);
-            listViewResults.Columns.Add("Y坐标", 75);
-            listViewResults.Columns.Add("角度", 60);
-            listViewResults.Columns.Add("面积", 70);
-            listViewResults.Columns.Add("类型", 80);
+            // 清除任何可能存在的列
+            listViewResults.Columns.Clear();
             
-            // 设置ListView的详细属性
+            // 初始化检测结果ListView
+            listViewResults.View = View.Details;
             listViewResults.FullRowSelect = true;
             listViewResults.GridLines = true;
             listViewResults.MultiSelect = false;
             listViewResults.HeaderStyle = ColumnHeaderStyle.Nonclickable;
             listViewResults.Scrollable = true;
+            listViewResults.HideSelection = false;
+            
+            // 添加列
+            listViewResults.Columns.Add("序号", 50, HorizontalAlignment.Center);
+            listViewResults.Columns.Add("X坐标", 80, HorizontalAlignment.Right);
+            listViewResults.Columns.Add("Y坐标", 80, HorizontalAlignment.Right);
+            listViewResults.Columns.Add("角度", 70, HorizontalAlignment.Right);
+            listViewResults.Columns.Add("面积", 80, HorizontalAlignment.Right);
+            listViewResults.Columns.Add("类型", 90, HorizontalAlignment.Center);
+            
+            // 确保ListView可见并正确显示
+            listViewResults.Visible = true;
+            listViewResults.BringToFront();
         }
 
         // 按钮事件处理器
@@ -229,7 +276,18 @@ namespace Multiobject_Sorting
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     halconWrapper.LoadImage(openFileDialog.FileName);
-                    UpdateStatus($"已加载图像: {Path.GetFileName(openFileDialog.FileName)}");
+                    
+                    // 获取图像推荐的窗口尺寸
+                    var (width, height) = halconWrapper.GetRecommendedWindowSize();
+                    
+                    // 调整HWindowControl的ImagePart和WindowSize以匹配图像尺寸
+                    hWindowControl1.ImagePart = new Rectangle(0, 0, width, height);
+                    hWindowControl1.WindowSize = new Size(width, height);
+                    
+                    // 重新显示图像
+                    halconWrapper.RefreshDisplay();
+                    
+                    UpdateStatus($"已加载图像: {Path.GetFileName(openFileDialog.FileName)} ({width}x{height})");
                 }
             }
             catch (Exception ex)
@@ -244,7 +302,18 @@ namespace Multiobject_Sorting
             try
             {
                 halconWrapper.LoadImage(); // 无参数表示从相机获取
-                UpdateStatus("已从相机获取图像");
+                
+                // 获取图像推荐的窗口尺寸
+                var (width, height) = halconWrapper.GetRecommendedWindowSize();
+                
+                // 调整HWindowControl的ImagePart和WindowSize以匹配图像尺寸
+                hWindowControl1.ImagePart = new Rectangle(0, 0, width, height);
+                hWindowControl1.WindowSize = new Size(width, height);
+                
+                // 重新显示图像
+                halconWrapper.RefreshDisplay();
+                
+                UpdateStatus($"已从相机获取图像 ({width}x{height})");
             }
             catch (Exception ex)
             {
@@ -289,6 +358,9 @@ namespace Multiobject_Sorting
             catch (Exception ex)
             {
                 UpdateStatus($"检测失败: {ex.Message}");
+                // 如果检测失败，清空结果列表
+                lastDetectionResults.Clear();
+                UpdateDetectionResults();
             }
         }
 
@@ -335,19 +407,39 @@ namespace Multiobject_Sorting
         // 更新检测结果显示
         private void UpdateDetectionResults()
         {
-            listViewResults.Items.Clear();
-            
-            for (int i = 0; i < lastDetectionResults.Count; i++)
+            try
             {
-                var result = lastDetectionResults[i];
-                var item = new ListViewItem((i + 1).ToString());
-                item.SubItems.Add(result.CenterX.ToString("F2"));
-                item.SubItems.Add(result.CenterY.ToString("F2"));
-                item.SubItems.Add(result.Angle.ToString("F2"));
-                item.SubItems.Add(result.Area.ToString("F0"));
-                item.SubItems.Add(result.ObjectType);
+                // 暂停ListView更新以提高性能
+                listViewResults.BeginUpdate();
+                listViewResults.Items.Clear();
                 
-                listViewResults.Items.Add(item);
+                for (int i = 0; i < lastDetectionResults.Count; i++)
+                {
+                    var result = lastDetectionResults[i];
+                    var item = new ListViewItem((i + 1).ToString());
+                    item.SubItems.Add(result.CenterX.ToString("F2"));
+                    item.SubItems.Add(result.CenterY.ToString("F2"));
+                    item.SubItems.Add(result.Angle.ToString("F1") + "°");
+                    item.SubItems.Add(result.Area.ToString("F0"));
+                    item.SubItems.Add(result.ObjectType ?? "未知");
+                    
+                    listViewResults.Items.Add(item);
+                }
+                
+                // 确保ListView可见
+                listViewResults.Visible = true;
+                
+                // 调试信息
+                System.Diagnostics.Debug.WriteLine($"ListView更新完成，显示{lastDetectionResults.Count}个结果");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"更新检测结果失败: {ex.Message}");
+            }
+            finally
+            {
+                // 恢复ListView更新
+                listViewResults.EndUpdate();
             }
         }
 

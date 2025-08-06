@@ -286,7 +286,7 @@ namespace Multiobject_Sorting
             this.listViewResults.HideSelection = false;
             this.listViewResults.Location = new System.Drawing.Point(6, 20);
             this.listViewResults.Name = "listViewResults";
-            this.listViewResults.Size = new System.Drawing.Size(485, 120);
+            this.listViewResults.Size = new System.Drawing.Size(490, 130);
             this.listViewResults.TabIndex = 3;
             this.listViewResults.UseCompatibleStateImageBehavior = false;
             this.listViewResults.View = System.Windows.Forms.View.Details;
@@ -297,7 +297,7 @@ namespace Multiobject_Sorting
             this.groupBox4.Controls.Add(this.listViewResults);
             this.groupBox4.Location = new System.Drawing.Point(3, 415);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(500, 150);
+            this.groupBox4.Size = new System.Drawing.Size(500, 160);
             this.groupBox4.TabIndex = 3;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "检测结果";

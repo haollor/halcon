@@ -97,7 +97,7 @@ namespace Multiobject_Sorting
                     HOperatorSet.ReadImage(out currentImage, imagePath);
                 }
 
-                // 显示图像并自适应窗口
+                // 显示图像
                 DisplayImageWithFit();
             }
             catch (Exception ex)
@@ -107,7 +107,7 @@ namespace Multiobject_Sorting
         }
 
         /// <summary>
-        /// 显示图像并自适应窗口大小
+        /// 显示图像并设置显示区域与图像尺寸完全一致
         /// </summary>
         private void DisplayImageWithFit()
         {
@@ -118,21 +118,19 @@ namespace Multiobject_Sorting
                 // 获取图像尺寸
                 HOperatorSet.GetImageSize(currentImage, out HTuple imageWidth, out HTuple imageHeight);
                 
-                // 获取窗口尺寸
-                HOperatorSet.GetWindowExtents(hWindow, out HTuple row, out HTuple column, out HTuple windowWidth, out HTuple windowHeight);
-
-                // 设置图像部分以完整显示图像
-                // -1参数表示自动调整到图像的完整尺寸
-                HOperatorSet.SetPart(hWindow, 0, 0, imageHeight - 1, imageWidth - 1);
-                
                 // 清空窗口
                 HOperatorSet.ClearWindow(hWindow);
+                
+                // 设置显示区域与图像尺寸完全一致 - 这是关键
+                // 参数：起始行、起始列、结束行、结束列
+                HOperatorSet.SetPart(hWindow, 0, 0, imageHeight.I - 1, imageWidth.I - 1);
                 
                 // 显示图像
                 HOperatorSet.DispObj(currentImage, hWindow);
                 
                 // 调试信息
-                System.Diagnostics.Debug.WriteLine($"图像尺寸: {imageWidth}x{imageHeight}, 窗口尺寸: {windowWidth}x{windowHeight}");
+                System.Diagnostics.Debug.WriteLine($"图像尺寸: {imageWidth}x{imageHeight}");
+                System.Diagnostics.Debug.WriteLine($"设置显示区域: 0,0 到 {imageHeight.I - 1},{imageWidth.I - 1}");
             }
             catch (Exception ex)
             {
@@ -140,8 +138,8 @@ namespace Multiobject_Sorting
                 // 退回到基本显示方式
                 try
                 {
-                    HOperatorSet.SetPart(hWindow, 0, 0, -1, -1);
                     HOperatorSet.ClearWindow(hWindow);
+                    HOperatorSet.SetPart(hWindow, 0, 0, -1, -1);
                     HOperatorSet.DispObj(currentImage, hWindow);
                 }
                 catch { }
@@ -418,6 +416,27 @@ namespace Multiobject_Sorting
             catch (Exception ex)
             {
                 throw new Exception($"HSV预览失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 获取推荐的窗口尺寸以完整显示图像
+        /// </summary>
+        /// <returns>推荐的窗口尺寸</returns>
+        public (int width, int height) GetRecommendedWindowSize()
+        {
+            try
+            {
+                if (currentImage != null)
+                {
+                    HOperatorSet.GetImageSize(currentImage, out HTuple imageWidth, out HTuple imageHeight);
+                    return (imageWidth.I, imageHeight.I);
+                }
+                return (640, 480); // 默认尺寸
+            }
+            catch
+            {
+                return (640, 480); // 默认尺寸
             }
         }
 
