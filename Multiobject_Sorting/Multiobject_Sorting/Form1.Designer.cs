@@ -62,16 +62,13 @@ namespace Multiobject_Sorting
             // hWindowControl1
             // 
             this.hWindowControl1.BackColor = System.Drawing.Color.Black;
-            this.hWindowControl1.BorderColor = System.Drawing.Color.Gray;
+            this.hWindowControl1.BorderColor = System.Drawing.Color.Black;
             this.hWindowControl1.ImagePart = new System.Drawing.Rectangle(0, 0, 640, 480);
             this.hWindowControl1.Location = new System.Drawing.Point(12, 12);
             this.hWindowControl1.Name = "hWindowControl1";
             this.hWindowControl1.Size = new System.Drawing.Size(640, 480);
             this.hWindowControl1.TabIndex = 0;
             this.hWindowControl1.WindowSize = new System.Drawing.Size(640, 480);
-            this.hWindowControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.hWindowControl1.HMouseDown += new HalconDotNet.HMouseEventHandler(this.hWindowControl1_HMouseDown);
             // 
             // dataGridView1

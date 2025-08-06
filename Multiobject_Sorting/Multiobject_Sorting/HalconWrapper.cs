@@ -41,30 +41,7 @@ namespace Multiobject_Sorting
         public HalconWrapper(HWindow window)
         {
             this.hWindow = window;
-            InitializeWindow();
-        }
-
-        private void InitializeWindow()
-        {
-            try
-            {
-                // 设置窗口部分显示整个图像
-                HOperatorSet.SetPart(hWindow, 0, 0, -1, -1);
-                
-                // 设置背景颜色
-                HOperatorSet.SetColor(hWindow, "black");
-                
-                // 清空窗口
-                HOperatorSet.ClearWindow(hWindow);
-                
-                // 设置绘制模式
-                HOperatorSet.SetDraw(hWindow, "margin");
-                HOperatorSet.SetLineWidth(hWindow, 2);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"初始化Halcon窗口失败: {ex.Message}");
-            }
+            HOperatorSet.SetPart(hWindow, 0, 0, -1, -1);
         }
 
         /// <summary>
@@ -78,18 +55,10 @@ namespace Multiobject_Sorting
                 if (string.IsNullOrEmpty(imagePath))
                 {
                     // 从相机获取图像 (需要配置相机参数)
-                    try
-                    {
-                        HOperatorSet.OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
-                            -1, "false", "default", "[0] USB Video Device", 0, -1, out HTuple frameGrabber);
-                        HOperatorSet.GrabImage(out currentImage, frameGrabber);
-                        HOperatorSet.CloseFramegrabber(frameGrabber);
-                    }
-                    catch
-                    {
-                        // 如果相机获取失败，使用测试图像
-                        HOperatorSet.GenImageConst(out currentImage, "byte", 640, 480);
-                    }
+                    HOperatorSet.OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
+                        -1, "false", "default", "[0] USB Video Device", 0, -1, out HTuple frameGrabber);
+                    HOperatorSet.GrabImage(out currentImage, frameGrabber);
+                    HOperatorSet.CloseFramegrabber(frameGrabber);
                 }
                 else
                 {
@@ -97,58 +66,12 @@ namespace Multiobject_Sorting
                     HOperatorSet.ReadImage(out currentImage, imagePath);
                 }
 
-                // 显示图像并自适应窗口
-                DisplayImageWithFit();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"加载图像失败: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 显示图像并自适应窗口大小
-        /// </summary>
-        private void DisplayImageWithFit()
-        {
-            try
-            {
-                if (currentImage == null) return;
-
-                // 获取图像尺寸
-                HOperatorSet.GetImageSize(currentImage, out HTuple imageWidth, out HTuple imageHeight);
-                
-                // 获取窗口尺寸
-                HOperatorSet.GetWindowExtents(hWindow, out HTuple row, out HTuple column, out HTuple windowWidth, out HTuple windowHeight);
-
-                // 计算缩放比例以适应窗口
-                double scaleX = (double)windowWidth / imageWidth;
-                double scaleY = (double)windowHeight / imageHeight;
-                double scale = Math.Min(scaleX, scaleY);
-
-                // 计算显示区域
-                int displayWidth = (int)(imageWidth * scale);
-                int displayHeight = (int)(imageHeight * scale);
-                
-                // 设置图像部分以完整显示
-                HOperatorSet.SetPart(hWindow, 0, 0, imageHeight - 1, imageWidth - 1);
-                
-                // 清空窗口
-                HOperatorSet.ClearWindow(hWindow);
-                
                 // 显示图像
                 HOperatorSet.DispObj(currentImage, hWindow);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"显示图像失败: {ex.Message}");
-                // 退回到基本显示方式
-                try
-                {
-                    HOperatorSet.SetPart(hWindow, 0, 0, -1, -1);
-                    HOperatorSet.DispObj(currentImage, hWindow);
-                }
-                catch { }
+                throw new Exception($"加载图像失败: {ex.Message}");
             }
         }
 
@@ -386,53 +309,6 @@ namespace Multiobject_Sorting
             {
                 // 忽略绘制错误，不影响主要功能
                 System.Diagnostics.Debug.WriteLine($"高亮显示对象时出错: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 刷新显示当前图像
-        /// </summary>
-        public void RefreshDisplay()
-        {
-            if (currentImage != null)
-            {
-                DisplayImageWithFit();
-            }
-        }
-
-        /// <summary>
-        /// 清空窗口显示
-        /// </summary>
-        public void ClearDisplay()
-        {
-            try
-            {
-                HOperatorSet.ClearWindow(hWindow);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"清空窗口失败: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 获取当前图像尺寸信息
-        /// </summary>
-        /// <returns>图像宽度和高度</returns>
-        public (int width, int height) GetImageSize()
-        {
-            try
-            {
-                if (currentImage != null)
-                {
-                    HOperatorSet.GetImageSize(currentImage, out HTuple width, out HTuple height);
-                    return (width.I, height.I);
-                }
-                return (0, 0);
-            }
-            catch
-            {
-                return (0, 0);
             }
         }
 
