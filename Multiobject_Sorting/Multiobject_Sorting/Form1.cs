@@ -490,6 +490,20 @@ namespace Multiobject_Sorting
             LoadParameters();
         }
 
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // HSVParameterForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(400, 300);
+            this.Name = "HSVParameterForm";
+            this.Text = "HSV参数设置";
+            this.ResumeLayout(false);
+        }
+
         private void LoadParameters()
         {
             // 这里应该加载参数到界面控件
@@ -512,6 +526,20 @@ namespace Multiobject_Sorting
             InitializeComponent();
         }
 
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // CalibrationPointForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(300, 200);
+            this.Name = "CalibrationPointForm";
+            this.Text = "标定点输入";
+            this.ResumeLayout(false);
+        }
+
         private void OKButton_Click(object sender, EventArgs e)
         {
             // 从文本框获取真实世界坐标
@@ -529,6 +557,20 @@ namespace Multiobject_Sorting
         {
             InitializeComponent();
             plcComm = communication;
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // PLCConfigForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(400, 300);
+            this.Name = "PLCConfigForm";
+            this.Text = "PLC配置";
+            this.ResumeLayout(false);
         }
 
         private async void ConnectButton_Click(object sender, EventArgs e)
